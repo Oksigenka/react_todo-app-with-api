@@ -22,14 +22,16 @@ export const TodoHeader: React.FC<Props> = ({
 }) => {
   return (
     <header className="todoapp__header">
-      <button
-        type="button"
-        className={`todoapp__toggle-all ${todos.every(todo => todo.completed) ? 'active' : ''}`}
-        data-cy="ToggleAllButton"
-        onClick={toggleAllTodos}
-      />
+      {todos.length > 0 && (
+        <button
+          type="button"
+          className={`todoapp__toggle-all ${todos.every(todo => todo.completed) ? 'active' : ''}`}
+          data-cy="ToggleAllButton"
+          onClick={toggleAllTodos}
+        />
+      )}
 
-      <form onSubmit={onSubmit}>  
+      <form onSubmit={onSubmit}>
         <input
           data-cy="NewTodoField"
           type="text"

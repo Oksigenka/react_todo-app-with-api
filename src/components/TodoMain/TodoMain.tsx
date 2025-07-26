@@ -8,6 +8,13 @@ type Prop = {
   onDeleted: (id: number) => void;
   deletingTodoId: number | null;
   deletingAllTodo: number[] | null;
+  loadingTodoId: number | null;
+  loadingAllTodo: number[] | null;
+  onEditSubmit: (
+    id: number,
+    oldTitle: string,
+    newTitle: string,
+  ) => void | Promise<void>;
 };
 
 export const TodoMain: React.FC<Prop> = ({
@@ -16,10 +23,12 @@ export const TodoMain: React.FC<Prop> = ({
   onDeleted,
   deletingTodoId,
   deletingAllTodo,
+  loadingTodoId,
+  loadingAllTodo,
+  onEditSubmit,
 }) => {
   return (
     <section className="todoapp__main" data-cy="TodoList">
-      {/* This todo is an active todo  className="todo" */}
       {todos.map(todo => (
         <TodoItem
           key={todo.id}
@@ -27,9 +36,12 @@ export const TodoMain: React.FC<Prop> = ({
           onToggle={() => toggleTodo(todo)}
           onDeleted={onDeleted}
           isLoading={
+            loadingTodoId === todo.id ||
             deletingTodoId === todo.id ||
+            (loadingAllTodo ? loadingAllTodo.includes(todo.id) : false) ||
             (deletingAllTodo ? deletingAllTodo.includes(todo.id) : false)
           }
+          onEditSubmit={onEditSubmit}
         />
       ))}
     </section>

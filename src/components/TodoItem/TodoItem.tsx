@@ -21,17 +21,18 @@ export const TodoItem: React.FC<Props> = ({
   onEditSubmit,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const [editingTitle, setEditingTitle] = useState('');
 
   useEffect(() => {
-    if (editingId === todo.id && inputRef.current) {
+    if (isEditing && inputRef.current) {
       inputRef.current.focus();
+      inputRef.current.select();
     }
-  }, [editingId, todo.id]);
+  }, [isEditing, todo.id]);
 
   function handleEdit() {
-    setEditingId(todo.id);
+    setIsEditing(true);
     setEditingTitle(todo.title);
   }
 
@@ -40,8 +41,12 @@ export const TodoItem: React.FC<Props> = ({
   }
 
   const handleEditSubmit = async () => {
-    await onEditSubmit(todo.id, todo.title, editingTitle);
-    setEditingId(null);
+    try {
+      await onEditSubmit(todo.id, todo.title, editingTitle);
+      if (editingTitle.trim() !== '') {
+        setIsEditing(false);
+      }
+    } catch {}
   };
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -50,7 +55,7 @@ export const TodoItem: React.FC<Props> = ({
     }
 
     if (e.key === 'Escape') {
-      setEditingId(null);
+      setIsEditing(false);
     }
   }
 
@@ -69,9 +74,10 @@ export const TodoItem: React.FC<Props> = ({
         />
       </label>
 
-      {editingId === todo.id ? (
+      {isEditing ? (
         <input
           ref={inputRef}
+          data-cy="TodoTitleField"
           className="todo__title-field"
           value={editingTitle}
           onChange={handleEditChange}
@@ -97,15 +103,15 @@ export const TodoItem: React.FC<Props> = ({
           >
             ×
           </button>
-          <div
-            data-cy="TodoLoader"
-            className={`modal overlay ${isLoading ? 'is-active' : ''}`}
-          >
-            <div className="modal-background has-background-white-ter" />
-            <div className="loader" />
-          </div>
         </>
       )}
+      <div
+        data-cy="TodoLoader"
+        className={`modal overlay ${isLoading ? 'is-active' : ''}`}
+      >
+        <div className="modal-background has-background-white-ter" />
+        <div className="loader" />
+      </div>
     </div>
   );
 };

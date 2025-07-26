@@ -13,7 +13,6 @@ import { TodoFooter } from '../TodoFooter';
 import { ErrorNotification } from '../ErrorNotification';
 import { Filter } from '../../types/Enum';
 import { TodoItem } from '../TodoItem';
-// import { todo } from 'node:test';
 
 export const TodoPage: React.FC = () => {
   const [titleMessage, setTitleMessage] = useState('');
@@ -25,7 +24,9 @@ export const TodoPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
   const [deletingTodoId, setDeletingTodoId] = useState<number | null>(null);
+  const [loadingTodoId, setLoadingTodoId] = useState<number | null>(null);
   const [deletingAllTodo, setDeletingAllTodo] = useState<number[] | null>(null);
+  const [loadingAllTodo, setLoadingAllTodo] = useState<number[] | null>(null);
 
   function loadTodos() {
     setErrorMessage('');
@@ -180,7 +181,7 @@ export const TodoPage: React.FC = () => {
   function toggleTodo(todoToUpdate: Todo) {
     setErrorMessage('');
 
-    setIsLoading(true);
+    setLoadingTodoId(todoToUpdate.id);
 
     const updatedTodo = {
       ...todoToUpdate,
@@ -196,11 +197,11 @@ export const TodoPage: React.FC = () => {
         });
       })
       .catch(() => {
-        setErrorMessage(' Unable to update a todo');
+        setErrorMessage('Unable to update a todo');
       })
       .finally(() => {
         setTimeout(() => {
-          setIsLoading(false);
+          setLoadingTodoId(null);
         }, 500);
       });
   }
@@ -210,12 +211,18 @@ export const TodoPage: React.FC = () => {
 
     const shouldCompleteAll = !todos.every(tod => tod.completed);
 
-    const updatedTodos = todos.map(tod => ({
-      ...tod,
-      completed: shouldCompleteAll,
-    }));
+    const todosToUpdate = todos
+      .filter(tod => tod.completed !== shouldCompleteAll)
+      .map(tod => ({
+        ...tod,
+        completed: shouldCompleteAll,
+      }));
 
-    Promise.all(updatedTodos.map(tod => updatePost(tod)))
+    const loadingIds = todosToUpdate.map(tod => tod.id);
+
+    setLoadingAllTodo(loadingIds);
+
+    Promise.all(todosToUpdate.map(tod => updatePost(tod)))
       .then(newTodos => {
         setTodos(currentTodos =>
           currentTodos.map(
@@ -224,33 +231,12 @@ export const TodoPage: React.FC = () => {
         );
       })
       .catch(() => {
-        setErrorMessage('Unable to toggle all todos');
-      });
-  }
-
-  function updateTodo(id: number, newTitle: string) {
-    setIsLoading(true);
-
-    const todoToUpdate = todos.find(todo => todo.id === id);
-
-    if (!todoToUpdate) {
-      return;
-    }
-
-    return updatePost({ ...todoToUpdate, title: newTitle })
-      .then(updatedTodo => {
-        setTodos(currentTodos =>
-          currentTodos.map(todo =>
-            todo.id === updatedTodo.id ? updatedTodo : todo,
-          ),
-        );
-      })
-      .catch(() => {
         setErrorMessage('Unable to update a todo');
-        throw new Error();
       })
       .finally(() => {
-        setTimeout(() => setIsLoading(false), 500);
+        setTimeout(() => {
+          setLoadingAllTodo(null);
+        }, 500);
       });
   }
 
@@ -262,20 +248,26 @@ export const TodoPage: React.FC = () => {
     const trimmedTitle = newTitle.trim();
 
     if (trimmedTitle === '') {
-      await deleteTodo(id);
+      try {
+        await deleteTodo(id);
+      } catch {
+        setErrorMessage('Unable to update a todo');
+
+        throw new Error('Unable to update a todo');
+      }
 
       return;
     }
 
     if (trimmedTitle !== oldTitle) {
-      setIsLoading(true);
+      setLoadingTodoId(id);
 
       const todoToUpdate = todos.find(todo => todo.id === id);
 
       if (!todoToUpdate) {
-        setErrorMessage('Todo not found');
+        setErrorMessage('Unable to update a todo');
 
-        return;
+        throw new Error('Unable to update a todo');
       }
 
       return updatePost({ ...todoToUpdate, title: trimmedTitle })
@@ -288,9 +280,12 @@ export const TodoPage: React.FC = () => {
         })
         .catch(() => {
           setErrorMessage('Unable to update a todo');
+          throw new Error('Unable to update a todo');
         })
         .finally(() => {
-          setTimeout(() => setIsLoading(false), 500);
+          setTimeout(() => {
+            setLoadingTodoId(null);
+          }, 500);
         });
     }
   };
@@ -315,6 +310,9 @@ export const TodoPage: React.FC = () => {
             onDeleted={deleteTodo}
             deletingTodoId={deletingTodoId}
             deletingAllTodo={deletingAllTodo}
+            onEditSubmit={handleEditSubmit}
+            loadingTodoId={loadingTodoId}
+            loadingAllTodo={loadingAllTodo}
           />
         )}
 

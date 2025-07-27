@@ -263,6 +263,8 @@ export const TodoPage: React.FC = () => {
 
       if (!todoToUpdate) {
         setErrorMessage('Unable to update a todo');
+
+        return;
       }
 
       return updateTodos({ ...todoToUpdate, title: trimmedTitle })
@@ -275,6 +277,7 @@ export const TodoPage: React.FC = () => {
         })
         .catch(() => {
           setErrorMessage('Unable to update a todo');
+          throw new Error();
         })
         .finally(() => {
           setTimeout(() => {

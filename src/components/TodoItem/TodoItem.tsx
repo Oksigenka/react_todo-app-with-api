@@ -41,13 +41,11 @@ export const TodoItem: React.FC<Props> = ({
   };
 
   const handleEditSubmit = async () => {
-    if (editingTitle.trim() === '') {
-      return;
-    }
-
     try {
       await onEditSubmit(todo.id, todo.title, editingTitle);
-      setIsEditing(false);
+      if (editingTitle.trim() !== '') {
+        setIsEditing(false);
+      }
     } catch {
       // should stay open
     }

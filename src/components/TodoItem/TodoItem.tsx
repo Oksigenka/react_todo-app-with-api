@@ -46,7 +46,9 @@ export const TodoItem: React.FC<Props> = ({
       if (editingTitle.trim() !== '') {
         setIsEditing(false);
       }
-    } catch {}
+    } catch {
+      // should stay open
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

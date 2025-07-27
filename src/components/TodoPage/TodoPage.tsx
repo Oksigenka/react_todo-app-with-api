@@ -262,7 +262,7 @@ export const TodoPage: React.FC = () => {
       const todoToUpdate = todos.find(todo => todo.id === id);
 
       if (!todoToUpdate) {
-        throw new Error('Unable to update a todo');
+        setErrorMessage('Unable to update a todo');
       }
 
       return updateTodos({ ...todoToUpdate, title: trimmedTitle })
@@ -274,7 +274,7 @@ export const TodoPage: React.FC = () => {
           );
         })
         .catch(() => {
-          throw new Error('Unable to update a todo');
+          setErrorMessage('Unable to update a todo');
         })
         .finally(() => {
           setTimeout(() => {

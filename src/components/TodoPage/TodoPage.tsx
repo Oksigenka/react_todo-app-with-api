@@ -264,7 +264,7 @@ export const TodoPage: React.FC = () => {
       if (!todoToUpdate) {
         setErrorMessage('Unable to update a todo');
 
-        return;
+        throw new Error();
       }
 
       return updateTodos({ ...todoToUpdate, title: trimmedTitle })

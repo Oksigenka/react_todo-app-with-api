@@ -250,7 +250,7 @@ export const TodoPage: React.FC = () => {
       try {
         await deleteTodo(id);
       } catch {
-        throw new Error('Unable to update a todo');
+        setErrorMessage('Unable to update a todo');
       }
 
       return;

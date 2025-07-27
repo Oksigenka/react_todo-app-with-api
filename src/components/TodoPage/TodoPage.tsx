@@ -1,17 +1,17 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Todo } from '../../types/Todo';
-import { TodoMain } from '../TodoMain';
+import { TodoList } from '../TodoList';
 import {
-  addPost,
+  addTodos,
   getTodos,
-  updatePost,
+  updateTodos,
   USER_ID,
-  deletePost,
+  deleteTodos,
 } from '../../api/todos';
 import { TodoHeader } from '../TodoHeader';
 import { TodoFooter } from '../TodoFooter';
 import { ErrorNotification } from '../ErrorNotification';
-import { Filter } from '../../types/Enum';
+import { Filter } from '../../types/Filter';
 import { TodoItem } from '../TodoItem';
 
 export const TodoPage: React.FC = () => {
@@ -19,8 +19,8 @@ export const TodoPage: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const inputFocus = useRef<HTMLInputElement>(null);
   const [errorMessage, setErrorMessage] = useState('');
-  const [filtered, setFiltered] = useState<Todo[]>([]);
-  const [currentFilter, setCurrentFilter] = useState<Filter>(Filter.All);
+  // const [filtered, setFiltered] = useState<Todo[]>([]);
+  const [filter, setFilter] = useState<Filter>(Filter.All);
   const [isLoading, setIsLoading] = useState(false);
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);
   const [deletingTodoId, setDeletingTodoId] = useState<number | null>(null);
@@ -28,13 +28,13 @@ export const TodoPage: React.FC = () => {
   const [deletingAllTodo, setDeletingAllTodo] = useState<number[] | null>(null);
   const [loadingAllTodo, setLoadingAllTodo] = useState<number[] | null>(null);
 
-  function loadTodos() {
+  const loadTodos = () => {
     setErrorMessage('');
 
     getTodos()
       .then(setTodos)
       .catch(() => setErrorMessage('Unable to load todos'));
-  }
+  };
 
   useEffect(loadTodos, []);
 
@@ -46,11 +46,11 @@ export const TodoPage: React.FC = () => {
     inputFocus.current?.focus();
   }, [isLoading, deletingTodoId, deletingAllTodo]);
 
-  function addTodo({ title, completed }: Todo) {
+  const addTodo = ({ title, completed }: Todo) => {
     setErrorMessage('');
 
-    return addPost({ title, completed });
-  }
+    return addTodos({ title, completed });
+  };
 
   useEffect(() => {
     if (errorMessage) {
@@ -104,30 +104,46 @@ export const TodoPage: React.FC = () => {
       });
   };
 
-  const handleFilterChange = (filter: Filter) => {
-    setCurrentFilter(filter);
+  const handleFilterChange = (currentfilter: Filter) => {
+    setFilter(currentfilter);
   };
 
-  useEffect(() => {
+  const filteredTodos = useMemo(() => {
     let result = [...todos];
 
-    if (currentFilter === Filter.Active) {
+    if (filter === Filter.Active) {
       result = result.filter(todo => !todo.completed);
-    } else if (currentFilter === Filter.Completed) {
+    } else if (filter === Filter.Completed) {
       result = result.filter(todo => todo.completed);
     }
 
-    setFiltered(result);
-  }, [todos, currentFilter]);
+    return result;
+  }, [todos, filter]);
 
-  const cleaningErrormessage = () => {
+  // const handleFilterChange = (currentfilter: Filter) => {
+  //   setFilter(currentfilter);
+  // };
+
+  // useEffect(() => {
+  //   let result = [...todos];
+
+  //   if (filter === Filter.Active) {
+  //     result = result.filter(todo => !todo.completed);
+  //   } else if (filter === Filter.Completed) {
+  //     result = result.filter(todo => todo.completed);
+  //   }
+
+  //   setFiltered(result);
+  // }, [todos, filter]);
+
+  const cleanErrorMessage = () => {
     setErrorMessage('');
   };
 
-  function deleteTodo(todoId: number) {
+  const deleteTodo = (todoId: number) => {
     setDeletingTodoId(todoId);
 
-    return deletePost(todoId)
+    return deleteTodos(todoId)
       .then(() => {
         setTodos(currentPosts =>
           currentPosts.filter(todo => todo.id !== todoId),
@@ -141,7 +157,7 @@ export const TodoPage: React.FC = () => {
           setDeletingTodoId(null);
         }, 500);
       });
-  }
+  };
 
   const handleClearCompleted = async () => {
     const completedTodos = todos.filter(todo => todo.completed);
@@ -158,7 +174,7 @@ export const TodoPage: React.FC = () => {
 
     for (const todo of completedTodos) {
       try {
-        await deletePost(todo.id);
+        await deleteTodos(todo.id);
       } catch {
         errors.push(todo.id);
       }
@@ -178,7 +194,7 @@ export const TodoPage: React.FC = () => {
     }, 500);
   };
 
-  function toggleTodo(todoToUpdate: Todo) {
+  const toggleTodo = (todoToUpdate: Todo) => {
     setErrorMessage('');
 
     setLoadingTodoId(todoToUpdate.id);
@@ -188,7 +204,7 @@ export const TodoPage: React.FC = () => {
       completed: !todoToUpdate.completed,
     };
 
-    return updatePost(updatedTodo)
+    return updateTodos(updatedTodo)
       .then(newTodo => {
         setTodos(currentTodo => {
           return currentTodo.map(tod =>
@@ -204,9 +220,9 @@ export const TodoPage: React.FC = () => {
           setLoadingTodoId(null);
         }, 500);
       });
-  }
+  };
 
-  function toggleAllTodos() {
+  const toggleAllTodos = () => {
     setErrorMessage('');
 
     const shouldCompleteAll = !todos.every(tod => tod.completed);
@@ -222,7 +238,7 @@ export const TodoPage: React.FC = () => {
 
     setLoadingAllTodo(loadingIds);
 
-    Promise.all(todosToUpdate.map(tod => updatePost(tod)))
+    Promise.all(todosToUpdate.map(tod => updateTodos(tod)))
       .then(newTodos => {
         setTodos(currentTodos =>
           currentTodos.map(
@@ -238,7 +254,7 @@ export const TodoPage: React.FC = () => {
           setLoadingAllTodo(null);
         }, 500);
       });
-  }
+  };
 
   const handleEditSubmit = async (
     id: number,
@@ -251,8 +267,6 @@ export const TodoPage: React.FC = () => {
       try {
         await deleteTodo(id);
       } catch {
-        setErrorMessage('Unable to update a todo');
-
         throw new Error('Unable to update a todo');
       }
 
@@ -265,12 +279,10 @@ export const TodoPage: React.FC = () => {
       const todoToUpdate = todos.find(todo => todo.id === id);
 
       if (!todoToUpdate) {
-        setErrorMessage('Unable to update a todo');
-
         throw new Error('Unable to update a todo');
       }
 
-      return updatePost({ ...todoToUpdate, title: trimmedTitle })
+      return updateTodos({ ...todoToUpdate, title: trimmedTitle })
         .then(updatedTodo => {
           setTodos(currentTodos =>
             currentTodos.map(todo =>
@@ -279,7 +291,6 @@ export const TodoPage: React.FC = () => {
           );
         })
         .catch(() => {
-          setErrorMessage('Unable to update a todo');
           throw new Error('Unable to update a todo');
         })
         .finally(() => {
@@ -304,8 +315,8 @@ export const TodoPage: React.FC = () => {
         />
 
         {todos.length > 0 && (
-          <TodoMain
-            todos={filtered}
+          <TodoList
+            todos={filteredTodos}
             toggleTodo={toggleTodo}
             onDeleted={deleteTodo}
             deletingTodoId={deletingTodoId}
@@ -331,7 +342,7 @@ export const TodoPage: React.FC = () => {
         {todos.length > 0 && (
           <TodoFooter
             todos={todos}
-            currentFilter={currentFilter}
+            filter={filter}
             onFilterChange={handleFilterChange}
             onDeletedCompleted={handleClearCompleted}
           />
@@ -340,7 +351,7 @@ export const TodoPage: React.FC = () => {
 
       <ErrorNotification
         message={errorMessage}
-        onCleaning={cleaningErrormessage}
+        onCleaning={cleanErrorMessage}
       />
     </>
   );

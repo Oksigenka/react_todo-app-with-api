@@ -1,10 +1,10 @@
 import React from 'react';
 import { Todo } from '../../types/Todo';
-import { Filter } from '../../types/Enum';
+import { Filter } from '../../types/Filter';
 
 type Props = {
   todos: Todo[];
-  currentFilter: Filter;
+  filter: Filter;
   onFilterChange: (filter: Filter) => void;
   onDeletedCompleted: () => void;
 };
@@ -32,7 +32,7 @@ const FILTER_LINKS: {
 
 export const TodoFooter: React.FC<Props> = ({
   todos,
-  currentFilter,
+  filter,
   onFilterChange,
   onDeletedCompleted,
 }) => {
@@ -47,7 +47,7 @@ export const TodoFooter: React.FC<Props> = ({
           <a
             key={value}
             href={href}
-            className={`filter__link ${currentFilter === value ? 'selected' : ''}`}
+            className={`filter__link ${filter === value ? 'selected' : ''}`}
             data-cy={dataCy}
             onClick={() => onFilterChange(value)}
           >

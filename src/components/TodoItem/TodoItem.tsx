@@ -31,14 +31,14 @@ export const TodoItem: React.FC<Props> = ({
     }
   }, [isEditing, todo.id]);
 
-  function handleEdit() {
+  const handleEdit = () => {
     setIsEditing(true);
     setEditingTitle(todo.title);
-  }
+  };
 
-  function handleEditChange(e: React.ChangeEvent<HTMLInputElement>) {
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEditingTitle(e.target.value);
-  }
+  };
 
   const handleEditSubmit = async () => {
     try {
@@ -49,7 +49,7 @@ export const TodoItem: React.FC<Props> = ({
     } catch {}
   };
 
-  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleEditSubmit();
     }
@@ -57,7 +57,7 @@ export const TodoItem: React.FC<Props> = ({
     if (e.key === 'Escape') {
       setIsEditing(false);
     }
-  }
+  };
 
   return (
     <div data-cy="Todo" className={todo.completed ? 'todo completed' : 'todo'}>

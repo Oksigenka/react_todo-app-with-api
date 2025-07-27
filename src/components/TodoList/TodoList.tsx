@@ -17,7 +17,7 @@ type Prop = {
   ) => void | Promise<void>;
 };
 
-export const TodoMain: React.FC<Prop> = ({
+export const TodoList: React.FC<Prop> = ({
   todos,
   toggleTodo,
   onDeleted,

@@ -120,22 +120,6 @@ export const TodoPage: React.FC = () => {
     return result;
   }, [todos, filter]);
 
-  // const handleFilterChange = (currentfilter: Filter) => {
-  //   setFilter(currentfilter);
-  // };
-
-  // useEffect(() => {
-  //   let result = [...todos];
-
-  //   if (filter === Filter.Active) {
-  //     result = result.filter(todo => !todo.completed);
-  //   } else if (filter === Filter.Completed) {
-  //     result = result.filter(todo => todo.completed);
-  //   }
-
-  //   setFiltered(result);
-  // }, [todos, filter]);
-
   const cleanErrorMessage = () => {
     setErrorMessage('');
   };

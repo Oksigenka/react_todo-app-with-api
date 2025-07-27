@@ -19,7 +19,6 @@ export const TodoPage: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const inputFocus = useRef<HTMLInputElement>(null);
   const [errorMessage, setErrorMessage] = useState('');
-  // const [filtered, setFiltered] = useState<Todo[]>([]);
   const [filter, setFilter] = useState<Filter>(Filter.All);
   const [isLoading, setIsLoading] = useState(false);
   const [tempTodo, setTempTodo] = useState<Todo | null>(null);

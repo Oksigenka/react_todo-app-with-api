@@ -1,6 +1,7 @@
 import React from 'react';
 import { Todo } from '../../types/Todo';
 import { Filter } from '../../types/Filter';
+import cn from 'classnames';
 
 type Props = {
   todos: Todo[];
@@ -9,26 +10,12 @@ type Props = {
   onDeletedCompleted: () => void;
 };
 
-const FILTER_LINKS: {
-  label: string;
-  value: Filter;
-  href: string;
-  dataCy: string;
-}[] = [
-  { label: 'All', value: Filter.All, href: '#/', dataCy: 'FilterLinkAll' },
-  {
-    label: 'Active',
-    value: Filter.Active,
-    href: '#/active',
-    dataCy: 'FilterLinkActive',
-  },
-  {
-    label: 'Completed',
-    value: Filter.Completed,
-    href: '#/completed',
-    dataCy: 'FilterLinkCompleted',
-  },
-];
+const FILTER_LINKS = Object.values(Filter).map(value => ({
+  value,
+  label: value[0].toLocaleUpperCase() + value.slice(1),
+  href: `#/${value}`,
+  dataCy: `FilterLink${value[0].toLocaleUpperCase() + value.slice(1)}`,
+}));
 
 export const TodoFooter: React.FC<Props> = ({
   todos,
@@ -36,10 +23,12 @@ export const TodoFooter: React.FC<Props> = ({
   onFilterChange,
   onDeletedCompleted,
 }) => {
+  const counterLength = todos.filter(todo => !todo.completed).length;
+
   return (
     <footer className="todoapp__footer" data-cy="Footer">
       <span className="todo-count" data-cy="TodosCounter">
-        {todos.filter(todo => !todo.completed).length} items left
+        {counterLength} items left
       </span>
 
       <nav className="filter" data-cy="Filter">
@@ -47,7 +36,7 @@ export const TodoFooter: React.FC<Props> = ({
           <a
             key={value}
             href={href}
-            className={`filter__link ${filter === value ? 'selected' : ''}`}
+            className={cn('filter__link', { selected: filter === value })}
             data-cy={dataCy}
             onClick={() => onFilterChange(value)}
           >

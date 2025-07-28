@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Todo } from '../../types/Todo';
+import cn from 'classnames';
 
 type Props = {
   todo: Todo;
@@ -23,6 +24,7 @@ export const TodoItem: React.FC<Props> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editingTitle, setEditingTitle] = useState('');
+  const { id, title, completed } = todo;
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -62,16 +64,16 @@ export const TodoItem: React.FC<Props> = ({
   };
 
   return (
-    <div data-cy="Todo" className={todo.completed ? 'todo completed' : 'todo'}>
+    <div data-cy="Todo" className={cn('todo', { completed: completed })}>
       {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-      <label className="todo__status-label" htmlFor={`todo-${todo.id}`}>
+      <label className="todo__status-label" htmlFor={`todo-${id}`}>
         <input
-          id={`todo-${todo.id}`}
+          id={`todo-${id}`}
           data-cy="TodoStatus"
           type="checkbox"
-          checked={todo.completed}
+          checked={completed}
           className="todo__status"
-          onChange={() => onToggle()}
+          onChange={onToggle}
           disabled={isLoading}
         />
       </label>
@@ -94,13 +96,13 @@ export const TodoItem: React.FC<Props> = ({
             className="todo__title"
             onDoubleClick={handleEdit}
           >
-            {todo.title}
+            {title}
           </span>
           <button
             type="button"
             className="todo__remove"
             data-cy="TodoDelete"
-            onClick={() => onDeleted(todo.id)}
+            onClick={() => onDeleted(id)}
             disabled={isLoading}
           >
             ×
@@ -109,7 +111,7 @@ export const TodoItem: React.FC<Props> = ({
       )}
       <div
         data-cy="TodoLoader"
-        className={`modal overlay ${isLoading ? 'is-active' : ''}`}
+        className={cn('modal', 'overlay', { 'is-active': isLoading })}
       >
         <div className="modal-background has-background-white-ter" />
         <div className="loader" />

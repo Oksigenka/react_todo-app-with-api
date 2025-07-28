@@ -1,5 +1,6 @@
 import React from 'react';
 import { Todo } from '../../types/Todo';
+import cn from 'classnames';
 
 type Props = {
   onSubmit: (event: React.FormEvent) => void;
@@ -25,7 +26,9 @@ export const TodoHeader: React.FC<Props> = ({
       {todos.length > 0 && (
         <button
           type="button"
-          className={`todoapp__toggle-all ${todos.every(todo => todo.completed) ? 'active' : ''}`}
+          className={cn('todoapp__toggle-all', {
+            active: todos.every(todo => todo.completed),
+          })}
           data-cy="ToggleAllButton"
           onClick={toggleAllTodos}
         />

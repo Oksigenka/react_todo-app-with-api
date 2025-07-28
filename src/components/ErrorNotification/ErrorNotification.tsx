@@ -17,7 +17,6 @@ export const ErrorNotification: React.FC<Props> = ({ message, onCleaning }) => {
         'has-text-weight-normal',
         { hidden: !message },
       )}
-      // className={`notification is-danger is-light has-text-weight-normal ${message ? '' : 'hidden'}`}
     >
       <button
         data-cy="HideErrorButton"
